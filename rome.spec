@@ -3,14 +3,13 @@
 
 Name:           rome
 Version:        0.9
-Release:        %mkrel 1
+Release:        %mkrel 1.0.1
 Epoch:          0
 Summary:        RSS and Atom Utilities for Java
 License:        Apache License
 Group:          Development/Java
 URL:            https://rome.dev.java.net/
-Source0:        https://rome.dev.java.net/source/browse/*checkout*/rome/www/dist//rome-0.9-src.zip
-Requires:       java
+Source0:        https://rome.dev.java.net/source/browse/*checkout*/rome/www/dist/rome-0.9-src.zip
 Requires:       jdom
 Requires:       jpackage-utils >= 0:1.6
 BuildRequires:  ant
@@ -26,8 +25,6 @@ BuildRequires:  java-devel
 BuildArch:      noarch
 %endif
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root
-#Vendor:        JPackage Project
-#Distribution:  JPackage
 
 %description
 ROME is an open source (Apache license) set of Atom/RSS Java
@@ -109,5 +106,3 @@ export OPT_JAR_LIST="ant/ant-junit"
 %defattr(0644,root,root,0755)
 %doc %{_javadocdir}/%{name}-%{version}
 %doc %dir %{_javadocdir}/%{name}
-
-
