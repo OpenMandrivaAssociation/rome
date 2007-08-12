@@ -3,7 +3,7 @@
 
 Name:           rome
 Version:        0.9
-Release:        %mkrel 1.0.1
+Release:        %mkrel 1.0.2
 Epoch:          0
 Summary:        RSS and Atom Utilities for Java
 License:        Apache License
@@ -81,13 +81,11 @@ export OPT_JAR_LIST="ant/ant-junit"
 %clean
 %{__rm} -rf %{buildroot}
 
-%post
 %if %{gcj_support}
+%post
 %{update_gcjdb}
-%endif
 
 %postun
-%if %{gcj_support}
 %{clean_gcjdb}
 %endif
 
