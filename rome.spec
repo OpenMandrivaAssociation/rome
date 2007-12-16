@@ -3,7 +3,7 @@
 
 Name:           rome
 Version:        0.9
-Release:        %mkrel 1.0.3
+Release:        %mkrel 1.0.4
 Epoch:          0
 Summary:        RSS and Atom Utilities for Java
 License:        Apache License
@@ -14,7 +14,7 @@ Requires:       jdom
 Requires:       jpackage-utils >= 0:1.6
 BuildRequires:  ant
 BuildRequires:  jdom
-BuildRequires:  jpackage-utils >= 0:1.6
+BuildRequires:  java-rpmbuild >= 0:1.6
 BuildRequires:  junit
 %if %{gcj_support}
 BuildRequires:  java-gcj-compat-devel
