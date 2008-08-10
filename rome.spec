@@ -1,27 +1,28 @@
-%define section         free
-%define gcj_support     1
 
 Name:           rome
 Version:        0.9
-Release:        %mkrel 1.0.4
+Release:        %mkrel 1.1.1
 Epoch:          0
 Summary:        RSS and Atom Utilities for Java
 License:        Apache License
 Group:          Development/Java
 URL:            https://rome.dev.java.net/
 Source0:        https://rome.dev.java.net/source/browse/*checkout*/rome/www/dist/rome-0.9-src.zip
+# wget http://download.eclipse.org/tools/orbit/downloads/drops/R20080611105805/bundles/com.sun.syndication_0.9.0.v200803061811.jar
+# unzip com.sun.syndication_0.9.0.v200803061811.jar META-INF/MANIFEST.MF
+# sed -i 's/\r//' META-INF/MANIFEST.MF
+# # We won't have the same SHA-1 sums
+# sed -i -e "/^Name/d" -e "/^SHA/d" -e "/^\ ass$/d" -e "/^$/d" META-INF/MANIFEST.MF
+Source1:	MANIFEST.MF
+Patch0:		%{name}-%{version}-addosgimanifest.patch
 Requires:       jdom
 Requires:       jpackage-utils >= 0:1.6
 BuildRequires:  ant
 BuildRequires:  jdom
 BuildRequires:  java-rpmbuild >= 0:1.6
 BuildRequires:  junit
-%if %{gcj_support}
-BuildRequires:  java-gcj-compat-devel
-%else
 BuildRequires:  java-devel
 BuildArch:      noarch
-%endif
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root
 
 %description
@@ -44,12 +45,14 @@ Summary:        Javadoc for %{name}
 Group:          Development/Java
 
 %description javadoc
-Javadoc for %{name}.
+This package contains the API documentation for %{name}.
 
 %prep
 %setup -q
 %{__mkdir_p} target/lib
 %{__perl} -pi -e 's|<javac|<javac nowarn="true"|g' build.xml
+cp -p %{SOURCE1} .
+%patch0
 
 %build
 export CLASSPATH=$(build-classpath jdom junit)
@@ -67,10 +70,6 @@ export OPT_JAR_LIST=:
 %{__cp} -a dist/docs/api/* %{buildroot}%{_javadocdir}/%{name}-%{version}
 %{__ln_s} %{name}-%{version} %{buildroot}%{_javadocdir}/%{name}
 
-%if %{gcj_support}
-%{_bindir}/aot-compile-rpm
-%endif
-
 %check
 export CLASSPATH=$(build-classpath jdom junit)
 export OPT_JAR_LIST="ant/ant-junit"
@@ -79,24 +78,11 @@ export OPT_JAR_LIST="ant/ant-junit"
 %clean
 %{__rm} -rf %{buildroot}
 
-%if %{gcj_support}
-%post
-%{update_gcjdb}
-
-%postun
-%{clean_gcjdb}
-%endif
-
 %files
 %defattr(0644,root,root,0755)
 %doc
 %{_javadir}/%{name}.jar
 %{_javadir}/%{name}-%{version}.jar
-%if %{gcj_support}
-%dir %{_libdir}/gcj/%{name}
-%attr(-,root,root) %{_libdir}/gcj/%{name}/%{name}-%{version}.jar.db
-%attr(-,root,root) %{_libdir}/gcj/%{name}/%{name}-%{version}.jar.so
-%endif
 
 %files javadoc
 %defattr(0644,root,root,0755)
