@@ -1,7 +1,7 @@
 
 Name:           rome
 Version:        0.9
-Release:        %mkrel 1.1.1
+Release:        %mkrel 1.1.2
 Epoch:          0
 Summary:        RSS and Atom Utilities for Java
 License:        Apache License
