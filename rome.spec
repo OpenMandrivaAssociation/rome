@@ -4,7 +4,7 @@ Version:	0.9
 Release:	14.0%{?dist}
 Summary:	RSS and Atom Utilities
 
-Group:		Development/Libraries
+
 License:	ASL 2.0
 URL:		https://rome.dev.java.net/
 # wget https://rome.dev.java.net/source/browse/*checkout*/rome/www/dist/rome-0.9-src.tar.gz?rev=1.1
@@ -36,7 +36,7 @@ publishing RSS and Atom feeds.
 
 %package	javadoc
 Summary:	Javadocs for %{name}
-Group:		Documentation
+
 Requires:	%{name} = %{version}-%{release}
 Requires:	jpackage-utils
 
