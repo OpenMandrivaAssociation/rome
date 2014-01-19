@@ -1,90 +1,121 @@
+%{?_javapackages_macros:%_javapackages_macros}
+Name:		rome
+Version:	0.9
+Release:	14.0%{?dist}
+Summary:	RSS and Atom Utilities
 
-Name:           rome
-Version:        0.9
-Release:        %mkrel 1.1.2
-Epoch:          0
-Summary:        RSS and Atom Utilities for Java
-License:        Apache License
-Group:          Development/Java
-URL:            https://rome.dev.java.net/
-Source0:        https://rome.dev.java.net/source/browse/*checkout*/rome/www/dist/rome-0.9-src.zip
-# wget http://download.eclipse.org/tools/orbit/downloads/drops/R20080611105805/bundles/com.sun.syndication_0.9.0.v200803061811.jar
+Group:		Development/Libraries
+License:	ASL 2.0
+URL:		https://rome.dev.java.net/
+# wget https://rome.dev.java.net/source/browse/*checkout*/rome/www/dist/rome-0.9-src.tar.gz?rev=1.1
+Source0:	%{name}-%{version}-src.tar.gz
+# wget http://download.eclipse.org/tools/orbit/downloads/drops/R20090825191606/bundles/com.sun.syndication_0.9.0.v200803061811.jar
 # unzip com.sun.syndication_0.9.0.v200803061811.jar META-INF/MANIFEST.MF
 # sed -i 's/\r//' META-INF/MANIFEST.MF
-# # We won't have the same SHA-1 sums
+# # We won't have the same SHA-1 sums (class sometimes spills into # cl\nass)
 # sed -i -e "/^Name/d" -e "/^SHA/d" -e "/^\ ass$/d" -e "/^$/d" META-INF/MANIFEST.MF
 Source1:	MANIFEST.MF
+Source2:    http://repo1.maven.org/maven2/%{name}/%{name}/%{version}/%{name}-%{version}.pom
+BuildArch:	noarch
+
 Patch0:		%{name}-%{version}-addosgimanifest.patch
-Requires:       jdom
-Requires:       jpackage-utils >= 0:1.6
-BuildRequires:  ant
-BuildRequires:  jdom
-BuildRequires:  java-rpmbuild >= 0:1.6
-BuildRequires:  junit
-BuildRequires:  java-devel
-BuildArch:      noarch
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root
+# fix maven-surefire-plugin aId
+Patch1:     %{name}-%{version}-pom.patch
+
+BuildRequires:	java-devel >= 1:1.7.0
+BuildRequires:	jpackage-utils
+BuildRequires:	ant
+BuildRequires:	jdom >= 1.1.2-3
+Requires:	java >= 1:1.7.0
+Requires:	jpackage-utils
+Requires:	jdom >= 1.1.2-3
 
 %description
-ROME is an open source (Apache license) set of Atom/RSS Java
-utilities that make it easy to work in Java with most syndication
-formats:
+ROME is an set of open source Java tools for parsing, generating and
+publishing RSS and Atom feeds.
 
-RSS 0.90, RSS 0.91 Netscape, RSS 0.91 Userland, RSS 0.92, RSS 0.93,
-RSS 0.94, RSS 1.0, RSS 2.0, Atom 0.3, and Atom 1.0.
-
-ROME includes a set of parsers and generators for the various flavors
-of syndication feeds, as well as converters to convert from one
-format to another. The parsers can give you back Java objects that
-are either specific for the format you want to work with, or a
-generic normalized SyndFeed class that lets you work on with the
-data without bothering about the incoming or outgoing feed type.
-
-%package javadoc
-Summary:        Javadoc for %{name}
-Group:          Development/Java
+%package	javadoc
+Summary:	Javadocs for %{name}
+Group:		Documentation
+Requires:	%{name} = %{version}-%{release}
+Requires:	jpackage-utils
 
 %description javadoc
 This package contains the API documentation for %{name}.
 
 %prep
 %setup -q
-%{__mkdir_p} target/lib
-%{__perl} -pi -e 's|<javac|<javac nowarn="true"|g' build.xml
+find -name '*.jar' -o -name '*.class' -exec rm -f '{}' \;
+mkdir -p target/lib
+ln -s %{_javadir}/jdom.jar target/lib
 cp -p %{SOURCE1} .
 %patch0
+cp -p %{SOURCE2} pom.xml
+%patch1
 
 %build
-export CLASSPATH=$(build-classpath jdom junit)
-export OPT_JAR_LIST=:
-%{ant} -Djdom=$(build-classpath jdom) jar javadoc compile-tests
+ant -Dnoget=true dist
 
 %install
-%{__rm} -rf %{buildroot}
+mkdir -p $RPM_BUILD_ROOT%{_javadir}
+cp -p target/%{name}-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{name}.jar
 
-%{__mkdir_p} %{buildroot}%{_javadir}
-%{__cp} -a target/%{name}-%{version}.jar %{buildroot}%{_javadir}/%{name}-%{version}.jar
-(cd %{buildroot}%{_javadir} && for jar in *-%{version}*; do %{__ln_s} ${jar} ${jar/-%{version}/}; done)
+mkdir -p $RPM_BUILD_ROOT%{_mavenpomdir}
+install -pm 644 pom.xml $RPM_BUILD_ROOT%{_mavenpomdir}/JPP-%{name}.pom
+%add_maven_depmap JPP-%{name}.pom %{name}.jar
 
-%{__mkdir_p} %{buildroot}%{_javadocdir}/%{name}-%{version}
-%{__cp} -a dist/docs/api/* %{buildroot}%{_javadocdir}/%{name}-%{version}
-%{__ln_s} %{name}-%{version} %{buildroot}%{_javadocdir}/%{name}
-
-%check
-export CLASSPATH=$(build-classpath jdom junit)
-export OPT_JAR_LIST="ant/ant-junit"
-%{ant} -Djdom=$(build-classpath jdom) internal-test || :
-
-%clean
-%{__rm} -rf %{buildroot}
+mkdir -p $RPM_BUILD_ROOT%{_javadocdir}/%{name}
+cp -rp dist/docs/api/* \
+  $RPM_BUILD_ROOT%{_javadocdir}/%{name}
 
 %files
-%defattr(0644,root,root,0755)
-%doc
 %{_javadir}/%{name}.jar
-%{_javadir}/%{name}-%{version}.jar
+%{_mavenpomdir}/JPP-%{name}.pom
+%{_mavendepmapfragdir}/%{name}
 
 %files javadoc
-%defattr(0644,root,root,0755)
-%doc %{_javadocdir}/%{name}-%{version}
-%doc %dir %{_javadocdir}/%{name}
+%{_javadocdir}/%{name}
+
+%changelog
+* Sun Aug 04 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.9-14
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
+
+* Thu Feb 14 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.9-13
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
+
+* Sat Jul 21 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.9-12
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
+
+* Fri May 25 2012 gil cattaneo <puntogil@libero.it> 0.9-11
+- Added maven POM
+
+* Tue Apr 17 2012 Alexander Kurtakov <akurtako@redhat.com> 0.9-10
+- Adapt to current guidelines.
+
+* Fri Apr 13 2012 Krzysztof Daniel <kdaniel@redhat.com> 0.9-9
+- Use Java 7
+- Use latest jdom
+
+* Sat Jan 14 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.9-8
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
+
+* Wed Feb 09 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.9-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
+
+* Mon Feb 15 2010 Alexander Kurtakov <akurtako@redhat.com> 0.9-6
+- Fix build with latest jdom. (rhbz#565057)
+
+* Mon Jan 11 2010 Andrew Overholt <overholt@redhat.com> 0.9-5
+- Update URL in instructions for getting MANIFEST.
+
+* Sun Jul 26 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.9-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_12_Mass_Rebuild
+
+* Mon Mar 30 2009 Andrew Overholt <overholt@redhat.com> 0.9-3
+- Fix javadoc Group (rhbz#492761).
+
+* Wed Feb 25 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.9-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_11_Mass_Rebuild
+
+* Fri Jul 25 2008 Andrew Overholt <overholt@redhat.com> 0.9-1
+- Initial Fedora version
