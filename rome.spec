@@ -1,9 +1,9 @@
 %{?_javapackages_macros:%_javapackages_macros}
 Name:		rome
 Version:	0.9
-Release:	14.0%{?dist}
+Release:	17.1
 Summary:	RSS and Atom Utilities
-
+Group:          Development/Java
 
 License:	ASL 2.0
 URL:		https://rome.dev.java.net/
@@ -68,10 +68,7 @@ mkdir -p $RPM_BUILD_ROOT%{_javadocdir}/%{name}
 cp -rp dist/docs/api/* \
   $RPM_BUILD_ROOT%{_javadocdir}/%{name}
 
-%files
-%{_javadir}/%{name}.jar
-%{_mavenpomdir}/JPP-%{name}.pom
-%{_mavendepmapfragdir}/%{name}
+%files -f .mfiles
 
 %files javadoc
 %{_javadocdir}/%{name}
