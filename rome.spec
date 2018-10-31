@@ -1,7 +1,7 @@
 %{?_javapackages_macros:%_javapackages_macros}
 Name:		rome
 Version:	0.9
-Release:	17.2
+Release:	17.3
 Summary:	RSS and Atom Utilities
 Group:          Development/Java
 
